@@ -142,9 +142,57 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 const getAllProperties = function(options, limit = 10) {
-  return pool.query(`SELECT * FROM properties LIMIT $1`, [limit])
-  .then(res => console.log("get all properties function successful")) //test
-  .catch(err => console.log(err));
+  const { city,
+    owner_id,
+    minimum_price_per_night,
+    maximum_price_per_night,
+    minimum_rating
+  } = options;
+  let queryParams = [];
+  let queryString = `
+  SELECT
+  properties.*,
+  avg(property_reviews.rating) as average_rating
+FROM
+  properties
+  JOIN property_reviews ON property_id = properties.id
+  WHERE 1 = 1
+  `
+  if (city) {
+    queryParams.push(`%${city}%`);
+    queryString += `AND city LIKE $${queryParams.length} `;
+  };
+
+  if (minimum_price_per_night) {
+    queryParams.push(minimum_price_per_night * 100);
+    queryString += `AND cost_per_night >= $${queryParams.length} `;
+  };
+
+  if (maximum_price_per_night) {
+    queryParams.push(maximum_price_per_night * 100);
+    queryString += `AND cost_per_night <= $${queryParams.length} `;
+  };
+
+  queryString += 'GROUP BY properties.id '
+
+  if (minimum_rating) {
+    queryParams.push(minimum_rating);
+    queryString += `HAVING avg(property_reviews.rating) >= $${queryParams.length} `;
+  
+  } 
+    queryParams.push(limit);
+    queryString +=`LIMIT $${queryParams.length}`
+  
+    console.log(queryString, queryParams);// test
+    
+return pool.query(queryString, queryParams)
+.then(res => {
+console.log(res.rows)
+console.log("search sucessful! Congratulations!!!")
+return res.rows;
+})
+.catch(err => console.log(err))
+
 }
 exports.getAllProperties = getAllProperties;
 
