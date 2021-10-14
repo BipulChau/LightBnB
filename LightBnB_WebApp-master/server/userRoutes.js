@@ -26,9 +26,13 @@ module.exports = function(router, database) {
   const login =  function(email, password) {
     return database.getUserWithEmail(email)
     .then(user => {
+      console.log("Authenticating") // test
+      console.log(password) // test
       if (bcrypt.compareSync(password, user.password)) {
+        console.log("authenticated") // test
         return user;
       }
+      console.log("not authenticated") //  test
       return null;
     });
   }
