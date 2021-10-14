@@ -163,6 +163,11 @@ FROM
     queryString += `AND city LIKE $${queryParams.length} `;
   };
 
+  if (owner_id) {
+    queryParams.push(owner_id);
+    queryString += `AND properties.owner_id = $${queryParams.length} `;
+  };
+
   if (minimum_price_per_night) {
     queryParams.push(minimum_price_per_night * 100);
     queryString += `AND cost_per_night >= $${queryParams.length} `;
