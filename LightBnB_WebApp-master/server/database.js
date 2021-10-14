@@ -208,9 +208,23 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  const property_keys = Object.keys(property) // getting table's column as an array
+  const numOfColumn = property_keys.length; // getting the num of column
+  const row_value = [];
+  for (let i = 1; i <= numOfColumn;  i++) { //pushing $n value for deparamatization
+    let eachCellValue = `$${i}`;
+    row_value.push(eachCellValue);
+  }
+  const property_values = Object.values(property)
+  const queryString = `
+  INSERT INTO properties (${property_keys.join(', ')})
+  VALUES(${row_value.join(', ')})
+  RETURNING *
+  `
+return pool.query(queryString, property_values)
+.then(res => {
+  console.log(res.rows)
+})
+.catch(err => console.log(err))
 }
 exports.addProperty = addProperty;
