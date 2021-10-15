@@ -217,13 +217,14 @@ const addProperty = function(property) {
   }
   const property_values = Object.values(property)
   const queryString = `
-  INSERT INTO properties (${property_keys.join(', ')})
+  INSERT INTO properties (${property_keys.join(', ')}) 
   VALUES(${row_value.join(', ')})
   RETURNING *
   `
 return pool.query(queryString, property_values)
 .then(res => {
-  console.log(res.rows)
+  console.log("Property added successfully")// test
+  return res.rows;
 })
 .catch(err => console.log(err))
 }
